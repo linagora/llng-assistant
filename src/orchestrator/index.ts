@@ -3,26 +3,21 @@ import type { Message, Tool } from "ollama";
 import type { McpClient, McpTool } from "../mcp-client/index.js";
 import type { Config } from "../config.js";
 
-function buildSystemPrompt(instanceNames: string[]): string {
-  const instanceList = instanceNames.length > 0
-    ? `\n\nYou manage the following LLNG instances: ${instanceNames.join(", ")}.\nAll tools are prefixed with the instance name (e.g., "${instanceNames[0]}/llng_config_get").\nAlways use the correct instance prefix when calling tools.`
-    : "";
-
-  return `You are an expert assistant for LemonLDAP::NG (LLNG),
+const SYSTEM_PROMPT = `You are an expert assistant for LemonLDAP::NG (LLNG),
 a web Single Sign-On and Access Management solution.
 
 You help operators diagnose and fix issues with their LLNG installation.
-You have access to tools that can inspect logs, configuration, sessions,
-and search the LLNG documentation.
+You have access to tools that can inspect configuration, sessions,
+and manage multiple LLNG instances.
 
 Guidelines:
-- Always check logs and current state before drawing conclusions
-- Search the documentation when asked about configuration or features
+- Always check current state before drawing conclusions
 - Be concise and actionable in your responses
 - When suggesting configuration changes, always explain the impact
 - For destructive actions (purging sessions, restarting services), ask for confirmation
-- You can respond in French or English, matching the operator's language${instanceList}`;
-}
+- Use the "instance" parameter on tools to target a specific LLNG instance
+- Use llng_instances to list available instances when needed
+- You can respond in French or English, matching the operator's language`;
 
 function mcpToolToOllamaTool(tool: McpTool): Tool {
   return {
@@ -44,16 +39,18 @@ export class Orchestrator {
     private config: Config,
     private mcpClient: McpClient
   ) {
+    const ollamaHost = process.env.OLLAMA_URL ?? "http://localhost:11434";
+    const timeoutMs = 5 * 60 * 1000; // 5 minutes
     this.ollama = new Ollama({
-      host: process.env.OLLAMA_URL ?? "http://localhost:11434",
+      host: ollamaHost,
+      fetch: (url, init) => fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) }),
     });
   }
 
   async initialize(): Promise<void> {
     const mcpTools = await this.mcpClient.listTools();
     this.tools = mcpTools.map(mcpToolToOllamaTool);
-    const instanceNames = this.mcpClient.getInstanceNames();
-    this.history = [{ role: "system", content: buildSystemPrompt(instanceNames) }];
+    this.history = [{ role: "system", content: SYSTEM_PROMPT }];
   }
 
   async chat(userMessage: string): Promise<string> {
@@ -95,7 +92,6 @@ export class Orchestrator {
   }
 
   resetHistory(): void {
-    const instanceNames = this.mcpClient.getInstanceNames();
-    this.history = [{ role: "system", content: buildSystemPrompt(instanceNames) }];
+    this.history = [{ role: "system", content: SYSTEM_PROMPT }];
   }
 }

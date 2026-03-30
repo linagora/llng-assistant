@@ -64,7 +64,7 @@ ollama pull mistral-nemo:12b
 ### 3. Install llng-assistant
 
 ```bash
-git clone https://github.com/guimard/llng-assistant.git
+git clone https://github.com/linagora/llng-assistant.git
 cd llng-assistant
 npm install
 npm run build
@@ -95,7 +95,7 @@ npm run build-index -- --src /path/to/lemonldap-ng/doc/sources/admin
 ### Docker installation (alternative)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/guimard/llng-assistant/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/linagora/llng-assistant/main/install.sh | bash
 ```
 
 The script handles Docker, Ollama, model download, and systemd service setup.
@@ -193,7 +193,7 @@ instances:
 ```
 
 For detailed llng-mcp configuration options, see the
-[llng-mcp documentation](https://github.com/guimard/llng-mcp).
+[llng-mcp documentation](https://github.com/linagora/llng-mcp).
 
 ## Documentation index
 
@@ -205,7 +205,7 @@ from source.
 ## Related projects
 
 This tool is built on top of:
-- [llng-mcp](https://github.com/guimard/llng-mcp) — MCP server for LLNG diagnostics
+- [llng-mcp](https://github.com/linagora/llng-mcp) — MCP server for LLNG diagnostics
 - [LemonLDAP::NG](https://lemonldap-ng.io/) — The excellent SSO platform we maintain
 
 ## License

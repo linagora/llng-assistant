@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: guimard/llng-assistant
+  IMAGE_NAME: linagora/llng-assistant
 
 jobs:
   build:

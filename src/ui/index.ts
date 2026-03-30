@@ -13,20 +13,18 @@ async function main() {
   const config = loadConfig();
 
   console.log(BANNER);
-  console.log(`  Model     : ${config.llm.model}`);
-  const names = Object.keys(config.instances);
-  if (names.length > 0) {
-    console.log(`  Instances : ${names.join(", ")}`);
-  } else {
-    console.log(`  Instances : (none configured)`);
-  }
+  console.log(`  Model : ${config.llm.model}`);
   console.log("");
 
-  const mcpClient = new McpClient(config.instances);
+  const mcpClient = new McpClient();
   await mcpClient.connect();
 
   const orchestrator = new Orchestrator(config, mcpClient);
   await orchestrator.initialize();
+
+  const tools = await mcpClient.listTools();
+  console.log(`  Tools : ${tools.length} available`);
+  console.log("");
 
   const rl = readline.createInterface({
     input: process.stdin,

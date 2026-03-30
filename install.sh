@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="guimard/llng-assistant"
+REPO="linagora/llng-assistant"
 CONFIG_DIR="${HOME}/.config/llng-assistant"
 CONFIG_FILE="${CONFIG_DIR}/config.yaml"
 COMPOSE_FILE="${CONFIG_DIR}/docker-compose.yml"
