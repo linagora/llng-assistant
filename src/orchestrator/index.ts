@@ -19,6 +19,24 @@ Guidelines:
 - Use llng_instances to list available instances when needed
 - You can respond in French or English, matching the operator's language`;
 
+// Tools to exclude from the LLM context to reduce prompt size.
+// These are still callable but won't be suggested by the model.
+const EXCLUDED_TOOL_PREFIXES = [
+  "llng_oidc_",       // OIDC testing tools (metadata, authorize, tokens, userinfo...)
+  "llng_oidc_rp_",    // OIDC RP management
+  "llng_consent_",    // User consent management
+  "llng_download_",   // CLI utilities
+  "llng_import_",     // CLI utilities
+  "llng_purge_",      // CLI utilities
+  "llng_test_",       // CLI utilities
+  "llng_info",        // CLI utilities
+  "llng_rotate_",     // CLI utilities
+];
+
+function isCoreTool(name: string): boolean {
+  return !EXCLUDED_TOOL_PREFIXES.some((prefix) => name.startsWith(prefix));
+}
+
 function mcpToolToOllamaTool(tool: McpTool): Tool {
   return {
     type: "function",
@@ -49,7 +67,8 @@ export class Orchestrator {
 
   async initialize(): Promise<void> {
     const mcpTools = await this.mcpClient.listTools();
-    this.tools = mcpTools.map(mcpToolToOllamaTool);
+    const coreTools = mcpTools.filter((t) => isCoreTool(t.name));
+    this.tools = coreTools.map(mcpToolToOllamaTool);
     this.history = [{ role: "system", content: SYSTEM_PROMPT }];
   }
 
@@ -78,9 +97,11 @@ export class Orchestrator {
 
         let toolResult: string;
         try {
+          process.stderr.write(`\x1b[90m  [tool] ${toolName}(${JSON.stringify(toolArgs)})\x1b[0m\n`);
           toolResult = await this.mcpClient.callTool(toolName, toolArgs);
         } catch (err) {
           toolResult = `Error calling tool ${toolName}: ${err}`;
+          process.stderr.write(`\x1b[31m  [error] ${toolResult}\x1b[0m\n`);
         }
 
         this.history.push({

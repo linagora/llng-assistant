@@ -15,6 +15,7 @@ export class McpClient {
     this.transport = new StdioClientTransport({
       command: "npx",
       args: ["-y", "llng-mcp"],
+      env: process.env as Record<string, string>,
     });
     this.client = new Client({ name: "llng-assistant", version: "0.1.0" }, {});
   }
