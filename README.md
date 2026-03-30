@@ -210,4 +210,4 @@ This tool is built on top of:
 
 ## License
 
-LGPL-2.1 — same as LemonLDAP::NG
+AGPL-3.0 — Copyright [LINAGORA](https://linagora.com)
