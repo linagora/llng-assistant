@@ -1,0 +1,25 @@
+{
+  "name": "llng-assistant",
+  "version": "0.1.0",
+  "description": "LemonLDAP::NG maintenance assistant powered by a local LLM",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/ui/index.js",
+    "build-index": "tsx scripts/build-index.ts",
+    "dev": "tsx src/ui/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "llng-mcp": "^0.1.1",
+    "ollama": "^0.5.0",
+    "js-yaml": "^4.1.0",
+    "marked": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
