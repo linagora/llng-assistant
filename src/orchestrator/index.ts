@@ -17,24 +17,27 @@ Guidelines:
 - For destructive actions (purging sessions, restarting services), ask for confirmation
 - Use the "instance" parameter on tools to target a specific LLNG instance
 - Use llng_instances to list available instances when needed
-- You can respond in French or English, matching the operator's language`;
+- You can respond in French or English, matching the operator's language
+/no_think`;
 
-// Tools to exclude from the LLM context to reduce prompt size.
-// These are still callable but won't be suggested by the model.
-const EXCLUDED_TOOL_PREFIXES = [
-  "llng_oidc_",       // OIDC testing tools (metadata, authorize, tokens, userinfo...)
-  "llng_oidc_rp_",    // OIDC RP management
-  "llng_consent_",    // User consent management
-  "llng_download_",   // CLI utilities
-  "llng_import_",     // CLI utilities
-  "llng_purge_",      // CLI utilities
-  "llng_test_",       // CLI utilities
-  "llng_info",        // CLI utilities
-  "llng_rotate_",     // CLI utilities
-];
+// Only expose essential tools to the LLM to keep prompt small (CPU-friendly).
+// All tools remain callable — only the LLM's awareness is limited.
+const CORE_TOOLS = new Set([
+  "llng_instances",
+  "llng_version",
+  "llng_health",
+  "llng_config_info",
+  "llng_config_get",
+  "llng_config_set",
+  "llng_session_search",
+  "llng_session_get",
+  "llng_session_delete",
+  "llng_2fa_list",
+  "llng_doc_search",
+]);
 
 function isCoreTool(name: string): boolean {
-  return !EXCLUDED_TOOL_PREFIXES.some((prefix) => name.startsWith(prefix));
+  return CORE_TOOLS.has(name);
 }
 
 function mcpToolToOllamaTool(tool: McpTool): Tool {
@@ -58,7 +61,7 @@ export class Orchestrator {
     private mcpClient: McpClient
   ) {
     const ollamaHost = process.env.OLLAMA_URL ?? "http://localhost:11434";
-    const timeoutMs = 5 * 60 * 1000; // 5 minutes
+    const timeoutMs = 10 * 60 * 1000; // 10 minutes
     this.ollama = new Ollama({
       host: ollamaHost,
       fetch: (url, init) => fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) }),

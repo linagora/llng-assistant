@@ -35,7 +35,7 @@ the Docker image and updated with each release.
 
 ### 1. Install Ollama
 
-Ollama runs LLMs locally on your machine. Install it:
+Ollama runs LLMs on your machine or on a remote server. Install it:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
@@ -47,18 +47,31 @@ Start the server (runs on `http://localhost:11434`):
 ollama serve
 ```
 
-### 2. Download an LLM
-
-Choose a model based on your available RAM:
-
-| Model | Download | RAM needed | Quality |
-|-------|----------|------------|---------|
-| `qwen2.5:7b` | 4.7 GB | 8 GB | Good |
-| `mistral-nemo:12b` | 5.1 GB | 16 GB | Better (recommended) |
-| `qwen2.5:14b` | 8.1 GB | 16 GB | Best |
+**Remote Ollama server (recommended for teams):** If you have a server with
+a GPU, install Ollama there and point llng-assistant to it. Operators run the
+assistant on their laptops — only HTTP requests are sent to the Ollama server,
+no GPU needed locally:
 
 ```bash
-ollama pull mistral-nemo:12b
+OLLAMA_URL=http://gpu-server:11434 npm start
+```
+
+### 2. Download an LLM
+
+Choose a model based on your hardware:
+
+| Model              | Download | RAM/VRAM needed          | Speed  | Quality    |
+| ------------------ | -------- | ------------------------ | ------ | ---------- |
+| `qwen3:4b`         | 2.6 GB   | 8 GB                     | Fast   | Acceptable |
+| `qwen3:8b`         | 5.2 GB   | 8 GB (GPU) / 16 GB (CPU) | Medium | Good       |
+| `mistral-nemo:12b` | 5.1 GB   | 16 GB                    | Medium | Better     |
+| `qwen2.5:14b`      | 8.1 GB   | 16 GB                    | Slow   | Best       |
+
+**With GPU (NVIDIA, Apple Silicon):** any model works well.
+**CPU only:** use `qwen3:4b` — larger models will be too slow for tool calling.
+
+```bash
+ollama pull qwen3:8b
 ```
 
 ### 3. Install llng-assistant
@@ -76,12 +89,11 @@ Create `~/.config/llng-assistant/config.yaml`:
 
 ```yaml
 llm:
-  model: mistral-nemo:12b
-
-mcp_config: ~/.llng-mcp.json
+  model: qwen3:8b
 ```
 
-Then configure your LLNG instances — see [Configuration](#configuration) below.
+Then configure your LLNG instances in `~/.llng-mcp.json` — see
+[Configuration](#configuration) below.
 
 ### 5. (Optional) Build the documentation index
 
@@ -132,7 +144,7 @@ llng-mcp.
 
 ```yaml
 llm:
-  model: mistral-nemo:12b   # auto-selected based on available RAM
+  model: mistral-nemo:12b # auto-selected based on available RAM
 
 mcp_config: ~/.llng-mcp.json
 ```
@@ -205,6 +217,7 @@ from source.
 ## Related projects
 
 This tool is built on top of:
+
 - [llng-mcp](https://github.com/linagora/llng-mcp) — MCP server for LLNG diagnostics
 - [LemonLDAP::NG](https://lemonldap-ng.io/) — The excellent SSO platform we maintain
 

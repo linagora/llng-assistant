@@ -13,8 +13,8 @@ export class McpClient {
 
   constructor() {
     this.transport = new StdioClientTransport({
-      command: "npx",
-      args: ["-y", "llng-mcp"],
+      command: process.env.LLNG_MCP_PATH ? "node" : "npx",
+      args: process.env.LLNG_MCP_PATH ? [process.env.LLNG_MCP_PATH] : ["-y", "llng-mcp"],
       env: process.env as Record<string, string>,
     });
     this.client = new Client({ name: "llng-assistant", version: "0.1.0" }, {});
