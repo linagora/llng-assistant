@@ -106,11 +106,65 @@ npm run build-index -- --src /path/to/lemonldap-ng/doc/sources/admin
 
 ### Docker installation (alternative)
 
+#### Scripted (recommended)
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/linagora/llng-assistant/main/install.sh | bash
 ```
 
 The script handles Docker, Ollama, model download, and systemd service setup.
+
+#### Manual
+
+Build the image:
+
+```bash
+docker build -t llng-assistant .
+```
+
+Make sure Ollama is running and the model is pulled on the host (or on a remote
+GPU server). Prepare both config files on your host:
+
+- `~/.config/llng-assistant/config.yaml` — LLM settings
+- `~/.llng-mcp.json` — LLNG instance definitions (see [Configuration](#configuration))
+
+The container is an interactive CLI, so it must be started with `-it`. On
+Linux, use `--network host` so the default `OLLAMA_URL=http://localhost:11434`
+reaches Ollama on the host:
+
+```bash
+docker run --rm -it \
+  --network host \
+  -v ~/.config/llng-assistant/config.yaml:/root/.config/llng-assistant/config.yaml:ro \
+  -v ~/.llng-mcp.json:/root/.llng-mcp.json:ro \
+  llng-assistant
+```
+
+On macOS, Windows, or when Ollama runs on a different host, point at it
+explicitly with `OLLAMA_URL`:
+
+```bash
+docker run --rm -it \
+  -e OLLAMA_URL=http://host.docker.internal:11434 \
+  -v ~/.config/llng-assistant/config.yaml:/root/.config/llng-assistant/config.yaml:ro \
+  -v ~/.llng-mcp.json:/root/.llng-mcp.json:ro \
+  llng-assistant
+```
+
+If your `~/.llng-mcp.json` uses SSH mode, also forward your SSH credentials:
+
+```bash
+  -v ~/.ssh:/root/.ssh:ro \
+  -v "$SSH_AUTH_SOCK:/ssh-agent" -e SSH_AUTH_SOCK=/ssh-agent
+```
+
+Supported environment variables:
+
+| Variable         | Effect                                            | Default                                       |
+| ---------------- | ------------------------------------------------- | --------------------------------------------- |
+| `OLLAMA_URL`     | Ollama server URL                                 | `http://localhost:11434`                      |
+| `CONFIG_PATH`    | Override the path to `config.yaml`                | `~/.config/llng-assistant/config.yaml`        |
+| `LLNG_MCP_PATH`  | Run a local llng-mcp checkout instead of the bundled one | _(unset — uses the globally installed `llng-mcp`)_ |
 
 ## Usage
 

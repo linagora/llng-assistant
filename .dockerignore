@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.github
+.claude
+*.local
+data
+lemonldap-ng
+install.sh
+README.md
+CHANGELOG.md
