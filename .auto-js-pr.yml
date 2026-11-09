@@ -1,0 +1,4 @@
+# Inscrit ce dépôt au bot auto-js-pr (mises à jour de dépendances vulnérables).
+#
+# Pas de tests : le bot détecte et lance `build` (tsc).
+{}
